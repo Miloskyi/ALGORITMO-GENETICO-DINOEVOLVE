@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>🦕 Dino GA Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap');
+
+        :root {
+            --bg: #0d0f18;
+            --bg2: #141720;
+            --bg3: #1a1e2e;
+            --border: #2a2f47;
+            --accent: #6478ff;
+            --green: #5ddba0;
+            --yellow: #f0c040;
+            --red: #ff5566;
+            --text: #c8d0ef;
+            --dim: #5a6080;
+            --cactus: #4db87a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Space Mono', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Header ───────────────────────────────── */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg2);
+        }
+
+        .logo {
+            font-size: 2rem;
+            animation: bounce 1.2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #fff;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .badge {
+            margin-left: auto;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border: 1px solid var(--accent);
+            border-radius: 100px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* ── Layout ───────────────────────────────── */
+        main {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            grid-template-rows: auto auto;
+            gap: 20px;
+            padding: 24px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ── Game Canvas ──────────────────────────── */
+        .game-section {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin-bottom: 10px;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg2);
+            display: block;
+        }
+
+        /* ── Stats Panel ──────────────────────────── */
+        .stats-panel {
+            grid-column: 2;
+            grid-row: 1 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .card-title {
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin-bottom: 14px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--dim);
+            font-size: 0.8rem;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-value.green {
+            color: var(--green);
+        }
+
+        .stat-value.yellow {
+            color: var(--yellow);
+        }
+
+        .stat-value.accent {
+            color: var(--accent);
+        }
+
+        /* Progress bar */
+        .progress-wrap {
+            margin: 10px 0 4px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.75rem;
+            color: var(--dim);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg3);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            transition: width 0.5s ease;
+        }
+
+        /* ── Chart ────────────────────────────────── */
+        .chart-section {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        #chartCanvas {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg2);
+            display: block;
+        }
+
+        /* ── Controls ─────────────────────────────── */
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            padding: 8px 18px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #7a8eff;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg3);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.8;
+        }
+
+        /* Speed selector */
+        .speed-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .speed-label {
+            font-size: 0.75rem;
+            color: var(--dim);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            background: var(--border);
+            border-radius: 99px;
+            outline: none;
+            flex: 1;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        #speedVal {
+            font-size: 0.8rem;
+            color: var(--accent);
+            min-width: 28px;
+        }
+
+        /* DNA bar visualization */
+        .dna-bar {
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .dna-bit {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            transition: background 0.3s;
+        }
+
+        /* Population grid */
+        .pop-grid {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .dino-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .footer-note {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--dim);
+            font-size: 0.72rem;
+            padding: 8px 0 4px;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">🦕</div>
+        <div>
+            <h1>Dino <span>GA</span></h1>
+            <div style="font-size:0.75rem;color:var(--dim);margin-top:2px;">Algoritmo Genético · Optimización de Red
+                Neuronal</div>
+        </div>
+        <div class="badge">Demo Visual</div>
+    </header>
+
+    <main>
+        <!-- Juego -->
+        <section class="game-section">
+            <div class="section-title">Simulación en Tiempo Real</div>
+            <canvas id="gameCanvas" width="720" height="220"></canvas>
+            <div style="margin-top:14px;" class="controls">
+                <button class="btn btn-primary" onclick="startSim()">▶ Iniciar / Nueva Gen</button>
+                <button class="btn btn-secondary" onclick="togglePause()">⏸ Pausar</button>
+                <button class="btn btn-danger" onclick="resetAll()">↺ Reset</button>
+            </div>
+            <div class="speed-group">
+                <span class="speed-label">Velocidad</span>
+                <input type="range" id="speedRange" min="1" max="8" value="2" oninput="updateSpeed()">
+                <span id="speedVal">×2</span>
+            </div>
+        </section>
+
+        <!-- Panel estadísticas -->
+        <aside class="stats-panel">
+
+            <div class="card">
+                <div class="card-title">Estado de Evolución</div>
+                <div class="stat-row">
+                    <span class="stat-label">Generación</span>
+                    <span class="stat-value accent" id="genNum">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Vivos</span>
+                    <span class="stat-value green" id="aliveNum">—</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Fitness actual (mejor)</span>
+                    <span class="stat-value" id="bestCur">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Fitness promedio</span>
+                    <span class="stat-value" id="avgCur">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">🏆 Récord</span>
+                    <span class="stat-value yellow" id="bestEver">0</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Población</div>
+                <div class="pop-grid" id="popGrid"></div>
+                <div class="progress-wrap">
+                    <div class="progress-label"><span>Supervivencia</span><span id="survPct">0%</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="survBar" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Parámetros AG</div>
+                <div class="stat-row"><span class="stat-label">Población</span><span class="stat-value">30</span></div>
+                <div class="stat-row"><span class="stat-label">Mutación</span><span class="stat-value">10%</span></div>
+                <div class="stat-row"><span class="stat-label">Cruce</span><span class="stat-value">80%</span></div>
+                <div class="stat-row"><span class="stat-label">Elitismo</span><span class="stat-value">3</span></div>
+                <div class="stat-row"><span class="stat-label">Red neuronal</span><span
+                        class="stat-value accent">4→8→1</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Cromosoma del Mejor</div>
+                <div class="dna-bar" id="dnaBar"></div>
+                <div style="font-size:0.65rem;color:var(--dim);margin-top:8px;">Cada cuadro = un peso de la red neuronal
+                    (81 genes)</div>
+            </div>
+
+        </aside>
+
+        <!-- Gráfico de evolución -->
+        <section class="chart-section">
+            <div class="section-title">Historial de Fitness por Generación</div>
+            <canvas id="chartCanvas" width="720" height="200"></canvas>
+        </section>
+
+        <div class="footer-note">
+            Este dashboard es la visualización web del proyecto Python. Ejecuta <code>python main.py</code> para la
+            versión completa con Pygame.
+        </div>
+    </main>
+
+    <script>
+        // ══════════════════════════════════════════════════════════════════
+        // SIMULACIÓN LIGERA EN JS — replica la lógica del AG en Python
+        // ══════════════════════════════════════════════════════════════════
+
+        const POP_SIZE = 30;
+        const NN_WEIGHTS = 81;   // 4*8 + 8 + 8*1 + 1
+        const MUTATION_RATE = 0.10;
+        const MUTATION_STR = 0.30;
+        const ELITISM = 3;
+        const CROSSOVER_R = 0.80;
+        const SCREEN_W = 720;
+        const SCREEN_H = 220;
+        const GROUND_Y = 165;
+        const GRAVITY = 0.9;
+        const JUMP_VEL = -14;
+        const INIT_SPEED = 4;
+
+        // ── Utilidades ────────────────────────────────────────────────────
+        const rand = (a, b) => Math.random() * (b - a) + a;
+        const randI = (a, b) => Math.floor(rand(a, b + 1));
+        const sigmoid = x => 1 / (1 + Math.exp(-x));
+        const tanh = x => Math.tanh(x);
+
+        // ── Red Neuronal ──────────────────────────────────────────────────
+        function predict(weights, inputs) {
+            // 4 → 8
+            const W1 = weights.slice(0, 32);
+            const b1 = weights.slice(32, 40);
+            const W2 = weights.slice(40, 48);
+            const b2 = weights[48];
+            // Capa oculta
+            const hidden = Array.from({ length: 8 }, (_, j) => {
+                let s = b1[j];
+                for (let i = 0; i < 4; i++) s += inputs[i] * W1[i * 8 + j];
+                return tanh(s);
+            });
+            // Capa salida
+            let out = b2;
+            for (let j = 0; j < 8; j++) out += hidden[j] * W2[j];
+            return sigmoid(out);
+        }
+
+        // ── Individuo ─────────────────────────────────────────────────────
+        function makeIndividual(weights) {
+            return {
+                weights: weights || Float32Array.from({ length: NN_WEIGHTS }, () => rand(-1, 1)),
+                fitness: 0,
+                alive: true,
+            };
+        }
+
+        // ── GA ────────────────────────────────────────────────────────────
+        let population = Array.from({ length: POP_SIZE }, () => makeIndividual());
+        let generation = 0;
+        let bestEver = 0;
+        let historyBest = [];
+        let historyAvg = [];
+
+        function tournament(pop, k = 3) {
+            let best = pop[randI(0, pop.length - 1)];
+            for (let i = 1; i < k; i++) {
+                const cand = pop[randI(0, pop.length - 1)];
+                if (cand.fitness > best.fitness) best = cand;
+            }
+            return best;
+        }
+
+        function crossover(p1, p2) {
+            if (Math.random() > CROSSOVER_R) return [
+                makeIndividual(p1.weights.slice()), makeIndividual(p2.weights.slice())
+            ];
+            const pt = randI(1, NN_WEIGHTS - 1);
+            const w1 = Float32Array.from([...p1.weights.slice(0, pt), ...p2.weights.slice(pt)]);
+            const w2 = Float32Array.from([...p2.weights.slice(0, pt), ...p1.weights.slice(pt)]);
+            return [makeIndividual(w1), makeIndividual(w2)];
+        }
+
+        function mutate(ind) {
+            const w = ind.weights.slice();
+            for (let i = 0; i < w.length; i++) {
+                if (Math.random() < MUTATION_RATE) {
+                    w[i] += (Math.random() * 2 - 1) * MUTATION_STR;
+                    w[i] = Math.max(-2, Math.min(2, w[i]));
+                }
+            }
+            return makeIndividual(w);
+        }
+
+        function evolve() {
+            const sorted = [...population].sort((a, b) => b.fitness - a.fitness);
+            const best = sorted[0].fitness;
+            const avg = sorted.reduce((s, i) => s + i.fitness, 0) / sorted.length;
+            if (best > bestEver) bestEver = best;
+            historyBest.push(best);
+            historyAvg.push(avg);
+
+            const next = [];
+            for (let i = 0; i < ELITISM; i++) {
+                next.push(makeIndividual(sorted[i].weights.slice()));
+            }
+            while (next.length < POP_SIZE) {
+                const p1 = tournament(population);
+                const p2 = tournament(population);
+                const [c1, c2] = crossover(p1, p2);
+                next.push(mutate(c1), mutate(c2));
+            }
+            population = next.slice(0, POP_SIZE);
+            generation++;
+        }
+
+        // ── Entorno del Juego ─────────────────────────────────────────────
+        let dinos, cacti, frame, speed, nextCactus;
+
+        function initEnv() {
+            dinos = population.map(() => ({
+                x: 60, y: GROUND_Y, vy: 0, onGround: true, alive: true, score: 0
+            }));
+            cacti = [];
+            frame = 0;
+            speed = INIT_SPEED;
+            nextCactus = randI(50, 120);
+        }
+
+        function getInputs(dino) {
+            let dist = 1, cH = 0.5;
+            const ahead = cacti.filter(c => c.x + c.w > dino.x);
+            if (ahead.length) {
+                const c = ahead.reduce((a, b) => a.x < b.x ? a : b);
+                dist = Math.max(0, c.x - dino.x) / SCREEN_W;
+                cH = c.h / 65;
+            }
+            const speedN = (speed - INIT_SPEED) / 6;
+            const dH = Math.max(0, (GROUND_Y - dino.y)) / (GROUND_Y * 0.6);
+            return [dist, cH, speedN, dH];
+        }
+
+        function stepEnv() {
+            frame++;
+            speed = INIT_SPEED + frame * 0.0012;
+            if (frame >= nextCactus) {
+                cacti.push({ x: SCREEN_W + 10, w: 16, h: randI(28, 60), speed });
+                nextCactus = frame + randI(55, 130);
+            }
+            for (const c of cacti) { c.speed = speed; c.x -= c.speed; }
+            cacti = cacti.filter(c => c.x + c.w > 0);
+
+            let any = false;
+            dinos.forEach((d, i) => {
+                if (!d.alive) return;
+                const inp = getInputs(d);
+                const dec = predict(population[i].weights, inp);
+                if (dec > 0.5 && d.onGround) { d.vy = JUMP_VEL; d.onGround = false; }
+                d.vy += GRAVITY;
+                d.y += d.vy;
+                if (d.y >= GROUND_Y) { d.y = GROUND_Y; d.vy = 0; d.onGround = true; }
+                d.score++;
+                // Colisión
+                for (const c of cacti) {
+                    const cy = GROUND_Y + 44 - c.h;
+                    if (d.x + 36 > c.x + 3 && d.x + 6 < c.x + c.w - 3 &&
+                        d.y + 44 > cy + 3 && d.y + 4 < cy + c.h - 3) {
+                        d.alive = false; break;
+                    }
+                }
+                if (d.alive) any = true;
+            });
+
+            dinos.forEach((d, i) => { population[i].fitness = d.score; population[i].alive = d.alive; });
+            return any;
+        }
+
+        // ── Renderizado ───────────────────────────────────────────────────
+        const gameCanvas = document.getElementById('gameCanvas');
+        const gCtx = gameCanvas.getContext('2d');
+        const chartCanvas = document.getElementById('chartCanvas');
+        const cCtx = chartCanvas.getContext('2d');
+
+        let groundScroll = 0;
+
+        function drawGame() {
+            gCtx.clearRect(0, 0, SCREEN_W, SCREEN_H);
+            gCtx.fillStyle = '#141720';
+            gCtx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+
+            // Suelo
+            groundScroll = (groundScroll + speed) % 50;
+            gCtx.strokeStyle = '#2a2f47'; gCtx.lineWidth = 1;
+            for (let x = -groundScroll; x < SCREEN_W; x += 50) {
+                gCtx.beginPath(); gCtx.moveTo(x, GROUND_Y + 44); gCtx.lineTo(x + 25, GROUND_Y + 44); gCtx.stroke();
+            }
+            gCtx.strokeStyle = '#3a4060'; gCtx.lineWidth = 2;
+            gCtx.beginPath(); gCtx.moveTo(0, GROUND_Y + 44); gCtx.lineTo(SCREEN_W, GROUND_Y + 44); gCtx.stroke();
+
+            // Cactus
+            for (const c of cacti) {
+                const cy = GROUND_Y + 44 - c.h;
+                gCtx.fillStyle = '#4db87a';
+                gCtx.beginPath(); gCtx.roundRect(c.x + 5, cy, 6, c.h, 2); gCtx.fill();
+                gCtx.beginPath(); gCtx.roundRect(c.x, cy + c.h * 0.3, 5, 5, 1); gCtx.fill();
+                gCtx.beginPath(); gCtx.roundRect(c.x + 11, cy + c.h * 0.45, 5, 5, 1); gCtx.fill();
+            }
+
+            // Dinos muertos
+            const alive = dinos.filter(d => d.alive);
+            const dead = dinos.filter(d => !d.alive);
+            for (const d of dead) drawDinoJS(gCtx, d, '#2a3050');
+            for (const d of alive) drawDinoJS(gCtx, d, '#5ddba0');
+            // Mejor vivo en amarillo
+            if (alive.length) {
+                const best = alive.reduce((a, b) => a.score > b.score ? a : b);
+                drawDinoJS(gCtx, best, '#f0c040');
+            }
+
+            // HUD
+            gCtx.fillStyle = '#5ddba0';
+            gCtx.font = 'bold 13px Space Mono, monospace';
+            gCtx.fillText(`Vivos: ${alive.length}/${POP_SIZE}`, 10, 22);
+            gCtx.fillStyle = '#5a6080';
+            gCtx.font = '11px Space Mono, monospace';
+            gCtx.fillText(`Gen ${generation}  vel ${speed.toFixed(1)}`, 10, SCREEN_H - 10);
+        }
+
+        function drawDinoJS(ctx, d, color) {
+            const x = d.x, y = d.y;
+            ctx.fillStyle = color + 'cc';
+            ctx.beginPath(); ctx.roundRect(x, y + 20, 36, 28, 3); ctx.fill();
+            ctx.fillStyle = color + 'dd';
+            ctx.beginPath(); ctx.roundRect(x + 12, y, 28, 22, 5); ctx.fill();
+            ctx.fillStyle = '#0d0f18';
+            ctx.beginPath(); ctx.arc(x + 36, y + 6, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = color + '99';
+            const lo = d.onGround ? Math.sin(Date.now() * 0.015) * 4 : 0;
+            ctx.beginPath(); ctx.roundRect(x + 4, y + 42 + lo, 7, 10, 2); ctx.fill();
+            ctx.beginPath(); ctx.roundRect(x + 18, y + 42 - lo, 7, 10, 2); ctx.fill();
+        }
+
+        function drawChart() {
+            const W = chartCanvas.width, H = chartCanvas.height;
+            cCtx.fillStyle = '#141720';
+            cCtx.fillRect(0, 0, W, H);
+
+            if (historyBest.length < 2) return;
+
+            const maxVal = Math.max(...historyBest, 1);
+            const px = (i) => (i / (historyBest.length - 1)) * (W - 40) + 20;
+            const py = (v) => H - 20 - (v / maxVal) * (H - 35);
+
+            // Grid
+            cCtx.strokeStyle = '#1e2338'; cCtx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = H - 20 - (i / 4) * (H - 35);
+                cCtx.beginPath(); cCtx.moveTo(20, y); cCtx.lineTo(W - 10, y); cCtx.stroke();
+                cCtx.fillStyle = '#3a4060'; cCtx.font = '10px monospace';
+                cCtx.fillText(Math.round(maxVal * i / 4), 2, y + 4);
+            }
+
+            // Promedio
+            cCtx.strokeStyle = '#5ddba088'; cCtx.lineWidth = 1.5;
+            cCtx.beginPath();
+            historyAvg.forEach((v, i) => i === 0 ? cCtx.moveTo(px(i), py(v)) : cCtx.lineTo(px(i), py(v)));
+            cCtx.stroke();
+
+            // Mejor
+            cCtx.strokeStyle = '#6478ff'; cCtx.lineWidth = 2.5;
+            cCtx.beginPath();
+            historyBest.forEach((v, i) => i === 0 ? cCtx.moveTo(px(i), py(v)) : cCtx.lineTo(px(i), py(v)));
+            cCtx.stroke();
+
+            // Leyenda
+            cCtx.fillStyle = '#6478ff'; cCtx.fillRect(W - 140, 8, 14, 3);
+            cCtx.fillStyle = '#c8d0ef'; cCtx.font = '11px monospace'; cCtx.fillText('Mejor', W - 122, 14);
+            cCtx.fillStyle = '#5ddba088'; cCtx.fillRect(W - 70, 8, 14, 3);
+            cCtx.fillStyle = '#c8d0ef'; cCtx.fillText('Prom', W - 52, 14);
+        }
+
+        function updateStats() {
+            const alive = dinos.filter(d => d.alive).length;
+            const fits = population.map(i => i.fitness);
+            const best = Math.max(...fits);
+            const avg = fits.reduce((a, b) => a + b, 0) / fits.length;
+
+            document.getElementById('genNum').textContent = generation;
+            document.getElementById('aliveNum').textContent = `${alive} / ${POP_SIZE}`;
+            document.getElementById('bestCur').textContent = Math.round(best);
+            document.getElementById('avgCur').textContent = Math.round(avg);
+            document.getElementById('bestEver').textContent = Math.round(bestEver);
+
+            const pct = Math.round(alive / POP_SIZE * 100);
+            document.getElementById('survPct').textContent = `${pct}%`;
+            document.getElementById('survBar').style.width = `${pct}%`;
+
+            // Population dots
+            const grid = document.getElementById('popGrid');
+            grid.innerHTML = '';
+            population.forEach(ind => {
+                const dot = document.createElement('div');
+                dot.className = 'dino-dot';
+                dot.style.background = ind.alive ? '#5ddba0' : '#2a3050';
+                grid.appendChild(dot);
+            });
+
+            // DNA bar (del mejor)
+            const bestInd = population.reduce((a, b) => a.fitness > b.fitness ? a : b);
+            const dnaBar = document.getElementById('dnaBar');
+            dnaBar.innerHTML = '';
+            for (let i = 0; i < NN_WEIGHTS; i++) {
+                const bit = document.createElement('div');
+                bit.className = 'dna-bit';
+                const v = (bestInd.weights[i] + 2) / 4;
+                const r = Math.round(100 * (1 - v) + 60 * v);
+                const g = Math.round(130 * v);
+                const b = Math.round(255 * v);
+                bit.style.background = `rgb(${r},${g},${b})`;
+                dnaBar.appendChild(bit);
+            }
+        }
+
+        // ── Loop principal ─────────────────────────────────────────────────
+        let simRunning = false;
+        let paused = false;
+        let speedMult = 2;
+        let animId;
+
+        function simLoop() {
+            if (!simRunning || paused) return;
+
+            let alive = true;
+            for (let s = 0; s < speedMult && alive; s++) {
+                alive = stepEnv();
+            }
+
+            drawGame();
+            updateStats();
+            drawChart();
+
+            if (!alive) {
+                // Generación terminada → evolucionar
+                evolve();
+                initEnv();
+            }
+
+            animId = requestAnimationFrame(simLoop);
+        }
+
+        function startSim() {
+            if (!simRunning) {
+                population = Array.from({ length: POP_SIZE }, () => makeIndividual());
+                generation = 0; bestEver = 0;
+                historyBest = []; historyAvg = [];
+            }
+            initEnv();
+            simRunning = true;
+            paused = false;
+            if (animId) cancelAnimationFrame(animId);
+            simLoop();
+        }
+
+        function togglePause() {
+            paused = !paused;
+            if (!paused) simLoop();
+        }
+
+        function resetAll() {
+            simRunning = false;
+            paused = false;
+            if (animId) cancelAnimationFrame(animId);
+            population = Array.from({ length: POP_SIZE }, () => makeIndividual());
+            generation = 0; bestEver = 0;
+            historyBest = []; historyAvg = [];
+            dinos = []; cacti = [];
+            gCtx.fillStyle = '#141720'; gCtx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+            cCtx.fillStyle = '#141720'; cCtx.fillRect(0, 0, 720, 200);
+            document.getElementById('genNum').textContent = '0';
+        }
+
+        function updateSpeed() {
+            speedMult = +document.getElementById('speedRange').value;
+            document.getElementById('speedVal').textContent = `×${speedMult}`;
+        }
+
+        // Auto-iniciar
+        startSim();
+    </script>
+</body>
+
+</html>
